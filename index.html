@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Info App</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        /* background: linear-gradient(to bottom, #eef2f3, #8e9eab); */
+        /* color: #333; */
+        background-image: url("assests/download.jpg");
+        background-size: cover
+        
+      }
+
+      /* Header styling */
+      .header {
+        text-align: center;
+        padding: 30px 20px;
+        /* background-color: #007bff; Blue background */
+        color: #00ff37; /* White text */
+        /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+      }
+
+      .header h1 {
+        font-size: 50px;
+        font-weight: bold;
+        margin: 0;
+        /* text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3); */
+      }
+
+      .header p {
+        font-size: 20px;
+        margin: 10px 0 0 0;
+        font-style: italic;
+        letter-spacing: 0.5px;
+      }
+
+      /* Container styling */
+      .container {
+        max-width: 500px;
+        margin: 50px auto;
+        /* background-color: white; */
+        background-color: lightcyan;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .container input,
+      .container select,
+      .container button {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .container input:focus,
+      .container select:focus,
+      .container button:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+      }
+
+      .container button {
+        background-color: palevioletred;
+        color: white;
+        cursor: pointer;
+        border: none;
+      }
+
+      .container button:hover {
+        background-color: lightgreen;
+      }
+
+      #output {
+        margin-top: 20px;
+        font-size: 18px;
+        /* color: #333; */
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 28px;
+        }
+
+        .header p {
+          font-size: 16px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .container {
+          padding: 15px;
+        }
+
+        .container input,
+        .container select,
+        .container button {
+          padding: 8px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Number Info App</h1>
+      <p>Interesting facts about numbers</p>
+    </div>
+    <div class="container">
+      <input type="text" id="numberInput" placeholder="Enter a number or date (MM-DD)" />
+      <select id="typeSelect">
+        <option value="trivia">Trivia</option>
+        <option value="math">Math</option>
+        <option value="date">Date</option>
+        <option value="year">Year</option>
+      </select>
+      <button id="getInfoButton">Get Info</button>
+      <p id="output"></p>
+    </div>
+    <script>
+        // Utility: Check if a number is prime
+        function isPrime(num) {
+          if (num < 2) return false;
+          for (let i = 2; i <= Math.sqrt(num); i++) {
+            if (num % i === 0) return false;
+          }
+          return true;
+        }
+  
+        // Utility: Check if a number is even
+        function isEven(num) {
+          return num % 2 === 0;
+        }
+  
+        document.getElementById("getInfoButton").addEventListener("click", function () {
+          const number = document.getElementById("numberInput").value;
+          const type = document.getElementById("typeSelect").value;
+          const output = document.getElementById("output");
+  
+          // Clear previous output
+          output.textContent = "";
+  
+          if (!number) {
+            output.textContent = "Please enter a number or date.";
+            return;
+          }
+  
+          // Handle 'date' type
+          if (type === "date") {
+            const dateParts = number.split("-");
+            if (dateParts.length === 2) {
+              const month = parseInt(dateParts[0], 10);
+              const day = parseInt(dateParts[1], 10);
+  
+              if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                fetch(`http://numbersapi.com/${month}/${day}/date`)
+                  .then((response) => response.text())
+                  .then((data) => {
+                    output.innerHTML = `<strong>${data}</strong>`;
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching data:", error);
+                    output.textContent =
+                      "Error fetching data. Please try again later.";
+                  });
+              } else {
+                output.textContent = "Please enter a valid date in MM-DD format.";
+              }
+            } else {
+              output.textContent = "Please enter the date in MM-DD format.";
+            }
+          } else {
+            // Handle other types: trivia, math, and year
+            // fetch(`http://numbersapi.com/${number}/${type}`)
+            fetch(`https://numbersapi.p.rapidapi.com/${number}/${type}`)
+
+              .then((response) => response.text())
+              .then((data) => {
+                const num = parseInt(number, 10);
+                const primeStatus = isPrime(num)
+                  ? "This is a prime number."
+                  : "This is not a prime number.";
+                const evenOddStatus = isEven(num)
+                  ? "This is an even number."
+                  : "This is an odd number.";
+                output.innerHTML = `<strong>${data}</strong><br><br>${evenOddStatus}<br>${primeStatus}`;
+              })
+              .catch((error) => {
+                console.error("Error fetching data:", error);
+                output.textContent =
+                  "Error fetching data. Please try again later.";
+              });
+          }
+        });
+      </script>
+  </body>
+</html>
